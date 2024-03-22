@@ -1,0 +1,42 @@
+{
+  "name": "toms_code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "n real time.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "Use Highlight.js (or any equivalent library) to highlight the syntax"
+  },
+  "keywords": [
+    "This",
+    "task",
+    "involves",
+    "client",
+    "server",
+    "and",
+    "DB",
+    "you",
+    "can",
+    "use",
+    "any",
+    "framework/language",
+    "you",
+    "want."
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.1",
+    "highlight.js": "^11.9.0",
+    "mongoose": "^8.2.3",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^9.1.7"
+  }
+}

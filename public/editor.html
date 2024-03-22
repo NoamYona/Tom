@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Code Block Editor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js/styles/github.css"> <!-- Changed to a GitHub-like theme for a more familiar coding environment -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #fafafa; /* Light grey background */
+            color: #333; /* Darker text for better readability */
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #codeBlock {
+            font-family: 'Fira Code', 'Consolas', monospace; /* Monospace font for code */
+            background-color: #fdf6e3; /* Soft yellow background, easier on the eyes */
+            border-radius: 8px; /* Rounded corners */
+            border: 1px solid #ccc; /* Subtle border */
+            padding: 20px;
+            width: 100%;
+            max-width: 800px; /* Max width for better readability on wide screens */
+            min-height: 200px;
+            margin: auto;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Soft shadow for depth */
+            transition: box-shadow 0.3s ease; /* Smooth transition for interactions */
+        }
+        #codeBlock:focus {
+            outline: none; /* Remove the default focus outline */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); /* More pronounced shadow on focus */
+        }
+        #smiley {
+            display: none;
+            font-size: 3rem; /* Larger smiley */
+            margin-top: 20px;
+            text-align: center;
+            color: #4CAF50; /* Green color for a positive reinforcement */
+        }
+    </style>
+</head>
+<body>
+<h1 id="title">Code Block Editor - <small id="role"></small></h1>
+<pre id="codeBlock" contenteditable></pre>
+<div id="smiley">😊</div>
+
+<script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/core.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js/lib/languages/javascript.js"></script>
+<script>
+    const codeBlock = document.getElementById('codeBlock');
+    const queryParams = new URLSearchParams(window.location.search);
+    const codeBlockId = queryParams.get('id');
+    const userRole = queryParams.get('role'); // Retrieve the role from the URL
+    const role = document.getElementById("role");
+
+    role.innerText = userRole;
+
+    // Fetch existing code block information
+    fetch(`/api/codeblocks/${codeBlockId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Set the fetched data to the code block
+            codeBlock.textContent = data.code;
+            document.getElementById("title").textContent = `Code Block Editor - ${data.title}`;
+            hljs.highlightElement(codeBlock);
+        })
+        .catch(error => {
+            console.error('Error fetching code block:', error);
+        });
+
+    let ws = new WebSocket('ws://localhost:3000');
+
+    ws.onopen = function() {
+        // Join the room corresponding to the code block
+        ws.send(JSON.stringify({ action: 'join', id: codeBlockId }));
+    };
+
+    // Determine editing capability based on the user role
+    codeBlock.contentEditable = userRole != 'teacher';
+    codeBlock.style.backgroundColor = userRole != 'teacher' ? '#fdf6e3' : '#ffde37'; // Use a different background color for read-only mode
+
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.id === codeBlockId) {
+            codeBlock.textContent = data.code;
+            hljs.highlightElement(codeBlock);
+        }
+    };
+
+    codeBlock.addEventListener('input', () => {
+        if (codeBlock.contentEditable == 'true') {
+            ws.send(JSON.stringify({ action: 'update', id: codeBlockId, code: codeBlock.textContent }));
+        }
+    });
+
+    // Additional logic for handling disconnection, reconnection, etc.
+</script>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Ignore all log files
+*.log
+
+# Ignore node modules directory
+node_modules/
+
+# But keep the .gitkeep file even if it's in an ignored directory
+!.gitkeep
+
+# Ignore all files in the secrets directory
+secrets/*
